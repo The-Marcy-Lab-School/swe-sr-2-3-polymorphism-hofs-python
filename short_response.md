@@ -104,7 +104,9 @@ for package in packages:
 # F1: $42, 7 days
 ```
 
-Fulton Street Post starts shipping a fourth kind of package, poster tubes, which cost $6 and take 4 days to deliver. In Version 1, a programmer adds this class but forgets to change either function:
+### Prompt 1
+
+Fulton Street Post starts shipping a fourth kind of package, poster tubes, which cost $6 and take 4 days to deliver. In Version 1, a programmer adds this `Tube` class but forgets to add a `Tube` branch to `shipping_cost()` and `delivery_days()`:
 
 ```py
 class Tube(Package):
@@ -114,7 +116,11 @@ class Tube(Package):
 packages.append(Tube('T1', weight=1))
 ```
 
-Predict the line that Version 1's loop prints for the tube when it is added to the `packages` list, and explain why Python raises no error. Then say what the programmer would write to add tubes to Version 2, and which existing lines of Version 2 would have to change. Finally, define **polymorphism** in one sentence that names what the loop in Version 2 does not need to know about each package.
+First, predict the line that **Version 1's loop** prints for the tube when it is added to the `packages` list, and explain why Python raises no error.
+
+### Prompt 2
+
+Then say what the programmer would write to add a `Tube` to **Version 2**, and which existing lines of Version 2 would have to change. Finally, define **polymorphism** in one sentence that names what the loop in Version 2 does not need to know about each package.
 
 ### Your Response
 
@@ -134,7 +140,7 @@ class HudsonCrate:
         return 18
 ```
 
-Hudson Couriers and Fulton Street Post are now working together to manage deliveries. Assuming at Fulton Street Post uses the Version 2 classes from question 1, the function below, `print_manifest`, is used to print out information about all of the packages shared by both companies
+Hudson Couriers and Fulton Street Post are now working together to manage deliveries. Assuming Fulton Street Post uses the Version 2 classes from question 1, the function below, `print_manifest`, is used to print out information about all of the packages shared by both companies
 
 ```py
 def print_manifest(packages):
@@ -146,7 +152,7 @@ shared_packages = [Letter('L1', weight=0), HudsonCrate(552, weight=40), Parcel('
 print_manifest(shared_packages)
 ```
 
-List the **contract** that `print_manifest()` depends on: every attribute and method it uses on each package. Then predict what the call prints, line by line, and explain where it stops and why. Use the term **duck typing** in your response. Then, explain how this could be avoided with an **abstract base class**.
+List the **contract** that `print_manifest()` depends on: every attribute and method it uses on each package. Then predict what the call prints, line by line, and explain where it stops and why. Use the term **duck typing** in your response. Then, explain how this could be avoided with an **abstract base class** assuming that Hudson Couriers agreed to have `HudsonCrate` inherit from it.
 
 ### Your Response
 
