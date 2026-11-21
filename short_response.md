@@ -1,49 +1,120 @@
 # Short Responses
 
-For this short response assignment, aim to write a response with the following
-qualities (your instructor will give you feedback on these areas):
+For this short response assignment, aim to write a response with the following qualities (your instructor will give you feedback on these areas):
 
 - [ ] Addresses all parts of the prompt
 - [ ] Accurately uses relevant technical terminology
 - [ ] Is free of grammar and spelling mistakes (double check with Grammarly!)
-- [ ] Uses markdown to enhance readability (preview in VS Code with
-      Command/Control + Shift + V)
+- [ ] Uses markdown to enhance readability (preview in VS Code with Command/Control + Shift + V)
 - [ ] Is easy to comprehend
 
-Write your response in the space provided. Make sure to preview your markdown
-to check how it is rendered before submitting.
+Write your response in the space provided. Make sure to preview your markdown to check how it is rendered before submitting.
 
 ## Question 1
 
-`len()` works on a string, a list, and a dictionary. A `for` loop runs over all
-three. None of them share an ancestor you wrote, and `len()` has no branch per
-type.
+Fulton Street Post is a neighborhood shipping counter. It ships three kinds of package: letters, parcels, and freight. Each kind has its own price and its own delivery time.
 
-Here is the same idea in Boro Bikes code:
+Here are two versions of the code that prints the day's packages. In Version 1, two functions decide each package's price and delivery time by checking which class the package belongs to:
 
 ```py
-def fleet_revenue(bikes, hours):
-    return sum(bike.hourly_rate() * hours for bike in bikes)
+# Version 1
+class Package:
+    def __init__(self, tracking, weight):
+        self.tracking = tracking
+        self.weight = weight
 
-fleet = [ClassicBike("A1", "Grand Army", False),
-         ElectricBike("E9", "Borough Hall", False, 24),
-         Scooter("S1", 80, False)]
+
+class Letter(Package):
+    pass
+
+
+class Parcel(Package):
+    pass
+
+
+class Freight(Package):
+    pass
+
+
+def shipping_cost(package):
+    if isinstance(package, Letter):
+        return 1
+    elif isinstance(package, Parcel):
+        return 4 + package.weight
+    elif isinstance(package, Freight):
+        return 30 + package.weight // 10
+
+
+def delivery_days(package):
+    if isinstance(package, Letter):
+        return 5
+    elif isinstance(package, Parcel):
+        return 3
+    elif isinstance(package, Freight):
+        return 7
+
+
+packages = [Letter('L1', weight=0), Parcel('P1', weight=6), Freight('F1', weight=120)]
+for package in packages:
+    print(f'{package.tracking}: ${shipping_cost(package)}, {delivery_days(package)} days')
+# L1: $1, 5 days
+# P1: $10, 3 days
+# F1: $42, 7 days
 ```
 
-`Scooter` does not inherit from `Bike`. The loop works anyway.
+In Version 2, each class defines its own `cost()` and `days()` methods, and the loop calls them:
 
-**First**, define polymorphism in one sentence. The sentence has to name what
-the **caller** gains, not what the classes do — the benefit belongs to
-`fleet_revenue`, which is the code that got simpler.
+```py
+# Version 2
+class Package:
+    def __init__(self, tracking, weight):
+        self.tracking = tracking
+        self.weight = weight
 
-**Second**, write down the contract this list depends on: every method name
-each element must answer for `fleet_revenue` and the rental screen
-(`is_rentable()`) to work. A list of names is enough.
 
-**Third**, answer this. Nothing in the code above says that `Scooter` has to
-keep answering `hourly_rate()`. Somebody could rename it tomorrow and no test
-in `Scooter`'s own file would fail. Say where that rename would surface, and how
-long it might take to notice.
+class Letter(Package):
+    def cost(self):
+        return 1
+
+    def days(self):
+        return 5
+
+
+class Parcel(Package):
+    def cost(self):
+        return 4 + self.weight
+
+    def days(self):
+        return 3
+
+
+class Freight(Package):
+    def cost(self):
+        return 30 + self.weight // 10
+
+    def days(self):
+        return 7
+
+
+packages = [Letter('L1', weight=0), Parcel('P1', weight=6), Freight('F1', weight=120)]
+for package in packages:
+    print(f'{package.tracking}: ${package.cost()}, {package.days()} days')
+# L1: $1, 5 days
+# P1: $10, 3 days
+# F1: $42, 7 days
+```
+
+Fulton Street Post starts shipping a fourth kind of package, poster tubes, which cost $6 and take 4 days to deliver. In Version 1, a programmer adds this class but forgets to change either function:
+
+```py
+class Tube(Package):
+    pass
+
+
+packages.append(Tube('T1', weight=1))
+```
+
+Predict the line that Version 1's loop prints for the tube when it is added to the `packages` list, and explain why Python raises no error. Then say what the programmer would write to add tubes to Version 2, and which existing lines of Version 2 would have to change. Finally, define **polymorphism** in one sentence that names what the loop in Version 2 does not need to know about each package.
 
 ### Your Response
 
@@ -51,40 +122,31 @@ long it might take to notice.
 
 ## Question 2
 
-Boro Bikes rents bikes, scooters and helmets. All three answer `is_rentable()`
-and `hourly_rate()`. Two engineers disagree about how to hold that agreement in
-place.
-
-**Ama** wants an abstract base class:
+A partner company, Hudson Couriers, has its own software for the crates they carry and its developers created the class `HudsonCrate` which does not inherit from `Package` (see Question 1):
 
 ```py
-class Rentable(ABC):
-    @abstractmethod
-    def is_rentable(self): pass
+class HudsonCrate:
+    def __init__(self, crate_number, weight):
+        self.tracking = f'HC-{crate_number}'
+        self.weight = weight
 
-    @abstractmethod
-    def hourly_rate(self): pass
+    def cost(self):
+        return 18
 ```
 
-Every rentable thing inherits it, and Python refuses to build a class that
-leaves a method out.
+Hudson Couriers and Fulton Street Post are now working together to manage deliveries. Assuming at Fulton Street Post uses the Version 2 classes from question 1, the function below, `print_manifest`, is used to print out information about all of the packages shared by both companies
 
-**Ben** wants the contract written in the docstring of the revenue report, and
-no base class. Any object answering those two names works, whoever wrote it.
+```py
+def print_manifest(packages):
+    for package in packages:
+        print(f'{package.tracking}: ${package.cost()}, {package.days()} days')
 
-Pick one for this system and defend it. Your answer has to do three things:
 
-1. Name the case where **Ama's** choice fails or costs more than it is worth.
-   There is a real one: think about an object Boro Bikes does not own, such as a
-   class from a library or a partner's API.
-2. Name the case where **Ben's** choice fails. Think about who finds out, and
-   when.
-3. Say which you would ship, for **this** system, and what fact about Boro
-   Bikes decided it.
+shared_packages = [Letter('L1', weight=0), HudsonCrate(552, weight=40), Parcel('P1', weight=6)]
+print_manifest(shared_packages)
+```
 
-There is no answer we are looking for. Both are used in real systems, and the
-reasoning is the whole question. An answer that says one is simply better
-without naming what it costs is not finished.
+List the **contract** that `print_manifest()` depends on: every attribute and method it uses on each package. Then predict what the call prints, line by line, and explain where it stops and why. Use the term **duck typing** in your response. Then, explain how this could be avoided with an **abstract base class**.
 
 ### Your Response
 
@@ -92,78 +154,39 @@ without naming what it costs is not finished.
 
 ## Question 3
 
-This question asks you to **write test code**, not prose.
-
-An abstract base class is only worth having if it actually refuses. Here is one:
+The code below defines four functions. One of them, `greet`, is defined inside `make_greeter`.
 
 ```py
-from abc import ABC, abstractmethod
+def shout(text):
+    return text.upper() + '!'
 
-class Rentable(ABC):
-    @abstractmethod
-    def is_rentable(self): pass
 
-    @abstractmethod
-    def hourly_rate(self): pass
+def apply_to_each(func, items):
+    results = []
+    for item in items:
+        results.append(func(item))
+    return results
+
+
+def make_greeter(greeting):
+    def greet(name):
+        return f'{greeting}, {name}'
+    return greet
+
+
+print(apply_to_each(shout, ['hello', 'bye']))   # ['HELLO!', 'BYE!']
+
+say_hi = make_greeter('Hi')
+say_bye = make_greeter('Goodbye')
+print(say_hi('Ana'))    # Hi, Ana
+print(say_hi('Bob'))    # Hi, Bob
+print(say_bye('Ana'))   # Goodbye, Ana
 ```
 
-Write **one** test that proves a subclass leaving out `hourly_rate()` cannot be
-instantiated. Use `pytest.raises(TypeError)`. Define the incomplete subclass
-inside the test — a class defined in a function is still a class.
+For each of `shout`, `apply_to_each`, `make_greeter`, and `greet`, say whether it is a **higher-order function**, and if it is, what makes it a higher-order function.
 
-Use `src/playground.py` in the code repo to run it, then paste it here.
-
-Then answer two things about it:
-
-1. **What does this test catch?** Name the change someone could make to
-   `Rentable` that would still pass every other test in the suite and fail this
-   one.
-2. **Where would the failure appear without the abstract base class?** The
-   incomplete class would be built happily. Say which line raises instead, and
-   why that is a worse place to find out.
-
-The second part is the point. A test on a refusal is worth writing when it moves
-a failure from somewhere confusing to somewhere obvious, and you should be able
-to say which two places those are.
+By the time `say_hi('Ana')` runs, `make_greeter('Hi')` has already returned. Explain how `greet` can still use `greeting`, and why `say_hi` and `say_bye` print different greetings. Use the term **closure** in your response.
 
 ### Your Response
 
 [Write your response here]
-
-## Question 4
-
-A **higher-order function** meets at least one of two conditions: it **takes** a
-function as an argument, or it **returns** a function.
-
-**First**, define a higher-order function in one sentence of your own.
-
-**Second**, here are four pieces of code. For each one, say whether it is
-higher-order, and if it is, **which of the two conditions** it meets. If it is
-not, say why not.
-
-```py
-# A
-sorted(bikes, key=lambda bike: bike.hourly_rate())
-
-# B
-station.bikes_where(is_cheap)
-
-# C
-sum(bike.hourly_rate() for bike in bikes)
-
-# D
-message_if(station, station.is_low, "send bikes")
-```
-
-One of these is not higher-order, and the reason is worth getting precise. It
-runs an expression once per item, which looks like the others but is not the
-same thing as being handed a function.
-
-**Third**, in **D**, `station.is_low` is written with no parentheses. Say what
-would be passed instead if it had them, and what error would follow — name the
-type in the error message.
-
-### Your Response
-
-[Write your response here]
-
